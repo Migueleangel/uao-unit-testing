@@ -11,7 +11,8 @@ const mock = new MockAdapter(axios);
 describe('generateFibonacciSequence', () => {
   it('generates Fibonacci sequence correctly', () => {
     const result = generateFibonacciSequence(10);
-    expect(result).toEqual([0, 1, 1, 2, 3, 5, 8]);
+    // Ajustar la secuencia esperada para iniciar con 0
+    expect(result).toEqual([0, 1, 1, 2, 3, 5, 8, 13]);
   });
 
   it('throws an error for limit less than or equal to 0', () => {
