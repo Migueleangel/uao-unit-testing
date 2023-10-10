@@ -1,54 +1,53 @@
-import {
-  describe, it, expect,
-} from '@jest/globals';
 import axios from 'axios';
-import MockAdapter from 'axios-mock-adapter';
+import {
+  describe, it, expect, jest,
+} from '@jest/globals';
 import { divide, getPosts } from '../moduleOne.mjs';
 
+jest.mock('axios'); // Movemos jest.mock aquí
+
 describe('divide function', () => {
-  it('should divide two numbers correctly', () => {
-    expect(divide(10, 2)).toBe(5);
+  it('should divide two numbers', () => {
+    expect(divide(6, 2)).toBe(3);
   });
 
   it('should throw an error when dividing by zero', () => {
-    expect(() => divide(10, 0)).toThrow('Error dividing by zero');
+    expect(() => {
+      divide(6, 0);
+    }).toThrow('Error dividing by zero');
   });
 });
 
 describe('getPosts function', () => {
-  it('should fetch and return posts data', async () => {
-    const mock = new MockAdapter(axios); // Configura la instancia mock
-    mock.onGet('https://jsonplaceholder.typicode.com/posts').reply(200, [{ id: 1, title: 'Post 1' }, { id: 2, title: 'Post 2' }]);
+  it('should fetch posts successfully', async () => {
+    const data = [/* your sample data here */];
+    jest.spyOn(axios, 'get').mockResolvedValue({ status: 200, data }); // Usamos jest.spyOn
 
     const result = await getPosts();
-    expect(result).toEqual([{ id: 1, title: 'Post 1' }, { id: 2, title: 'Post 2' }]);
+    expect(result).toEqual(data);
   });
 
-  it('should throw an error when the status code is not 200', async () => {
-    const mock = new MockAdapter(axios); // Configura la instancia mock
-    mock.onGet('https://jsonplaceholder.typicode.com/posts').reply(500); // Configura la respuesta simulada con un código de estado 500
+  it('should throw an error on non-200 status code', async () => {
+    jest.spyOn(axios, 'get').mockResolvedValue({ status: 404 });
 
     await expect(getPosts()).rejects.toThrow('Error fetching posts');
   });
 
-  it('should throw an error when data is not an array', async () => {
-    const mock = new MockAdapter(axios); // Configura la instancia mock
-    mock.onGet('https://jsonplaceholder.typicode.com/posts').reply(200, {});
+  it('should throw an error if data is not an array', async () => {
+    jest.spyOn(axios, 'get').mockResolvedValue({ status: 200, data: {} });
 
     await expect(getPosts()).rejects.toThrow('Data is not an array');
   });
 
-  it('should throw an error when no posts are found', async () => {
-    const mock = new MockAdapter(axios); // Configura la instancia mock
-    mock.onGet('https://jsonplaceholder.typicode.com/posts').reply(200, []);
+  it('should throw an error if data is an empty array', async () => {
+    jest.spyOn(axios, 'get').mockResolvedValue({ status: 200, data: [] });
 
     await expect(getPosts()).rejects.toThrow('No posts found');
   });
 
-  it('should throw an error when too many posts are returned', async () => {
-    const mock = new MockAdapter(axios); // Configura la instancia mock
-    const mockData = new Array(11).fill({ id: 1, title: 'Post 1' });
-    mock.onGet('https://jsonplaceholder.typicode.com/posts').reply(200, mockData);
+  it('should throw an error if data has more than 10 posts', async () => {
+    const data = Array.from({ length: 11 }, (_, i) => ({ id: i }));
+    jest.spyOn(axios, 'get').mockResolvedValue({ status: 200, data });
 
     await expect(getPosts()).rejects.toThrow('Too many posts');
   });
