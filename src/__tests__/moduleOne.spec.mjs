@@ -4,7 +4,7 @@ import {
 } from '@jest/globals';
 import { divide, getPosts } from '../moduleOne.mjs';
 
-jest.mock('axios'); // Movemos jest.mock aquí
+jest.mock('axios');
 
 describe('divide function', () => {
   it('should divide two numbers', () => {
@@ -21,7 +21,7 @@ describe('divide function', () => {
 describe('getPosts function', () => {
   it('should fetch posts successfully', async () => {
     const data = [/* your sample data here */];
-    jest.spyOn(axios, 'get').mockResolvedValue({ status: 200, data }); // Usamos jest.spyOn
+    jest.spyOn(axios, 'get').mockResolvedValue({ status: 200, data });
 
     const result = await getPosts();
     expect(result).toEqual(data);
@@ -50,5 +50,18 @@ describe('getPosts function', () => {
     jest.spyOn(axios, 'get').mockResolvedValue({ status: 200, data });
 
     await expect(getPosts()).rejects.toThrow('Too many posts');
+  });
+
+  it('should handle network error', async () => {
+    jest.spyOn(axios, 'get').mockRejectedValue(new Error('Network error'));
+
+    await expect(getPosts()).rejects.toThrow('Network error');
+  });
+
+  it('should throw an error if data is missing required fields', async () => {
+    const data = [{ title: 'Post 1' }]; // Missing 'id'
+    jest.spyOn(axios, 'get').mockResolvedValue({ status: 200, data });
+
+    await expect(getPosts()).rejects.toThrow('Missing required fields');
   });
 });
