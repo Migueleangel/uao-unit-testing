@@ -50,10 +50,11 @@ describe('getTodos', () => {
 
     await expect(getTodos()).rejects.toThrow('No completed todos found');
   });
-
   it('throws an error if response status is not 200', async () => {
-    mock.onGet('https://jsonplaceholder.typicode.com/todos').reply(404);
+    // Configura axios-mock-adapter para que devuelva un estado 400
+    mock.onGet('https://jsonplaceholder.typicode.com/todos').reply(400);
 
-    await expect(getTodos()).rejects.toThrow('Request failed with status code 404');
+    // Espera que getTodos lance una excepción con el mensaje correcto
+    await expect(getTodos()).rejects.toThrow('Error fetching todos');
   });
 });
